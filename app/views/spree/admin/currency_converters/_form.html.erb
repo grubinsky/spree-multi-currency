@@ -1,33 +1,19 @@
 <table>
-  <tr>
-    <td><%= t("currency_converter_currency") %>: </td>
-    <td>
-      <%= error_message_on :currency_converter, :currency_id %>
-      <%= f.select :currency_id, Spree::Currency.all.map{|x| [x.name, x.id]}  %>
-    </td>
-  </tr>
+  <% money = Spree::Currency.get('032') %>
+  <%= f.hidden_field :currency_id, :value => money.id %>
+  <%= f.hidden_field :date_req, :value => Time.now %>
+  <%= f.hidden_field :nominal, :value => 0 %>
+  <%= f.hidden_field :value, :value => 0 %>
 
   <tr>
-    <td><%= t("currency_converter_date_req") %>: </td>
-    <td>
-      <%= error_message_on :currency_converter, :date_req %>
-      <%= f.text_field :date_req, :class => 'datepicker'  %>
-    </td>
+    <td>Moneda: </td>
+    <td><%= money.name %></td>
   </tr>
-
   <tr>
-    <td><%= t("currency_converter_nominal") %>: </td>
+    <td>Tasa de conversión: </td>
     <td>
-      <%= error_message_on :currency_converter, :nominal %>
-      <%= f.text_field :nominal  %>
-    </td>
-  </tr>
-
-  <tr>
-    <td><%= t("currency_converter_value") %>: </td>
-    <td>
-      <%= error_message_on :currency_converter, :value %>
-      <%= f.text_field :value  %>
+      <%= error_message_on :currency_converter, :direct_rate %>
+      <%= f.text_field :direct_rate  %>
     </td>
   </tr>
 

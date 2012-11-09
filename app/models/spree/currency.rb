@@ -47,8 +47,13 @@ module Spree
         current(options[:locale] || I18n.locale)
         basic
         if @rate = @current.currency_converters.get_rate(options[:date] || Time.now)
-          add_rate(@basic.char_code,   @current.char_code, @rate.nominal/@rate.value.to_f)
-          add_rate(@current.char_code, @basic.char_code,   @rate.value.to_f)
+          if @rate.direct_rate.blank?
+            add_rate(@basic.char_code,   @current.char_code, @rate.nominal/@rate.value.to_f)
+            add_rate(@current.char_code, @basic.char_code,   @rate.value.to_f)
+          else
+            add_rate(@basic.char_code,   @current.char_code, @rate.direct_rate.to_f)
+            add_rate(@current.char_code, @basic.char_code,   1/@rate.direct_rate.to_f)
+          end
         end
 
       end
@@ -65,9 +70,6 @@ module Spree
       def conversion_to_current(value, options = { })
         load_rate(options)
         convert(value, @basic.char_code, @current.char_code)
-      rescue => ex
-        Rails.logger.error " [ Currency ] :#{ex.inspect}"
-        value
       end
 
       # Converts the currency value of the current locale to the basic currency.
@@ -88,9 +90,6 @@ module Spree
         value.gsub!(",","") if (value =~ /\.[0-9]+\,/)
 
         convert(value, @current.char_code, @basic.char_code)
-      rescue => ex
-        Rails.logger.error " [ Currency ] :#{ex.inspect}"
-        value
       end
 
 
@@ -106,7 +105,7 @@ module Spree
       private
 
       def add_rate(from, to, rate)
-        Money.add_rate(from, to, rate.to_f ) unless Money.default_bank.get_rate(from, to)
+        Money.add_rate(from, to, rate.to_f )
       end
 
     end
